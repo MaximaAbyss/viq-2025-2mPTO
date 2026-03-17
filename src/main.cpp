@@ -37,7 +37,7 @@ void setup(){
     l_claw_finger.extend(cylinder1);
     l_claw_finger.retract(cylinder2);
     catch_r_claw.extend(cylinder1);
-    catch_r_claw.extend(cylinder2);
+    catch_r_claw.retract(cylinder2);
     ninety_one.retract(cylinder2);
 }
 
@@ -45,7 +45,7 @@ void setup(){
 //      VARIABLES
 bool is_dt_stopped;
 bool is_l_claw_grabbing = false;
-bool is_r_claw_grabbing = false;
+bool is_r_claw_grabbing = true;
 bool is_finger_down = false;
 bool is_ninety_one_down = true;
 bool is_catch_extended = true;
@@ -87,33 +87,42 @@ void move_6_bar(int controller_pos){
 
 }
 
-void manual_arm(bool up_is_true){
+void manual_arm_forward(){
+    if(!is_catch_extended){
+            catch_r_claw.extend(cylinder1);
+            is_catch_extended =! is_catch_extended;
+        }
     pto_l.setVelocity(100,pct);
     pto_r.setVelocity(100,pct);
 
-    if (up_is_true){
-        pto_l.spin(forward);
-        pto_r.spin(forward);
-    }
-    else{
-        pto_l.spin(reverse);
-        pto_r.spin(reverse);
-    }
-
-
+    pto_l.spin(reverse);
+    pto_r.spin(reverse);
 }
 
-void run_pto(){
-    
+void manual_arm_reverse(){
+    if(!is_catch_extended){
+            catch_r_claw.extend(cylinder1);
+            is_catch_extended =! is_catch_extended;
+        }
+    pto_l.setVelocity(100,pct);
+    pto_r.setVelocity(100,pct); 
 
+    pto_l.spin(forward);
+    pto_r.spin(forward);
+  
+}
 
-    if(controller1.ButtonRDown.pressing()){
-        manual_arm(true);
-    }
-    else if(controller1.ButtonRUp.pressing()){
-        manual_arm(false);
-    }
-    else if(abs(controller1.AxisD.position()) > 5){
+void manual_arm_stop(){
+    pto_l.setVelocity(0,pct);
+    pto_r.setVelocity(0,pct); 
+
+    pto_l.stop();
+    pto_r.stop();
+}
+
+void run_six_bar(){
+
+    if(abs(controller1.AxisD.position()) > 5){
         if(is_catch_extended){
             catch_r_claw.retract(cylinder1);
             is_catch_extended =! is_catch_extended;
@@ -154,14 +163,20 @@ void ninety_one_flip(){
 }
 
 void load_beam(){
+    if(!is_catch_extended){
+            catch_r_claw.extend(cylinder1);
+            is_catch_extended =! is_catch_extended;
+        }
     pto_l.setVelocity(100,pct);
     pto_r.setVelocity(100,pct);
-    pto_l.spinToPosition(1.34,turns,false);
+    pto_l.spinToPosition(-1.34,turns,false);
     pto_r.spinToPosition(-1.34,turns,true);
     wait(0.5,sec);
 
     l_claw_finger.extend(cylinder1);
-    catch_r_claw.extend(cylinder2);
+    is_l_claw_grabbing = false;
+    catch_r_claw.retract(cylinder2);
+    is_r_claw_grabbing = true;
 
     wait(0.5, sec);
     pto_l.spinToPosition(0,turns,false);
@@ -169,6 +184,16 @@ void load_beam(){
 
 }
 
+void hold_arm(){
+    while(controller1.ButtonLUp.pressing()){
+        if(is_catch_extended){
+            catch_r_claw.retract(cylinder1);
+            is_catch_extended =! is_catch_extended;
+        }
+    }
+    catch_r_claw.extend(cylinder1);
+    is_catch_extended =! is_catch_extended;
+}   
 
 
 void setup_callbacks(){
@@ -178,8 +203,14 @@ void setup_callbacks(){
     controller1.ButtonR3.pressed(finger_move);
 
     controller1.ButtonLDown.pressed(load_beam);
+    controller1.ButtonLUp.pressed(hold_arm);
 
-    
+    controller1.ButtonRUp.pressed(manual_arm_forward);
+    controller1.ButtonRDown.pressed(manual_arm_reverse);
+    controller1.ButtonRUp.released(manual_arm_stop);
+    controller1.ButtonRDown.released(manual_arm_stop);
+
+    controller1.AxisD.changed(run_six_bar); 
 }
 
 
@@ -190,7 +221,6 @@ int main() {
    
     while(1) {
         manual_drive(controller1.AxisB.position(), controller1.AxisA.position());
-        run_pto();
         this_thread::sleep_for(10);
     }
 }

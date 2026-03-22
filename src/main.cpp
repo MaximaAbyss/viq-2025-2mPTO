@@ -1,5 +1,5 @@
 #include "vex.h"
-
+// -2.11 121 6 BAR
 using namespace vex;
 
 vex::brain       Brain;
@@ -20,8 +20,8 @@ motor pto_r(PORT4, 1.0, false);
 
 //      PNEUMATICS
 pneumatic l_claw_finger(PORT12);
-pneumatic catch_r_claw(PORT6);
-pneumatic ninety_one(PORT2);
+pneumatic pas_r_claw(PORT6);
+pneumatic catch_ninetyone(PORT2);
 
 //      OTHER
 vex::controller controller1;
@@ -31,14 +31,17 @@ void setup(){
     dt_l.setStopping(coast);
     dt_r.setStopping(coast);
 
+    pto_l.resetPosition();
     pto_l.setStopping(hold);
     pto_l.setStopping(hold);
+    pto_l.setTimeout(2,sec);
+    pto_r.setTimeout(2,sec);
 
     l_claw_finger.extend(cylinder1);
     l_claw_finger.retract(cylinder2);
-    catch_r_claw.extend(cylinder1);
-    catch_r_claw.retract(cylinder2);
-    ninety_one.retract(cylinder2);
+    pas_r_claw.extend(cylinder1);
+    pas_r_claw.retract(cylinder2);
+    catch_ninetyone.retract(cylinder2);
 }
 
 
@@ -47,8 +50,10 @@ bool is_dt_stopped;
 bool is_l_claw_grabbing = false;
 bool is_r_claw_grabbing = true;
 bool is_finger_down = false;
-bool is_ninety_one_down = true;
+bool is_ninetyone_down = true;
 bool is_catch_extended = true;
+bool is_pas_tech_on = false;
+int six_bar_stage = 0;
 
 
 //      FUNCTIONS
@@ -89,7 +94,7 @@ void move_6_bar(int controller_pos){
 
 void manual_arm_forward(){
     if(!is_catch_extended){
-            catch_r_claw.extend(cylinder1);
+            catch_ninetyone.extend(cylinder1);
             is_catch_extended =! is_catch_extended;
         }
     pto_l.setVelocity(100,pct);
@@ -101,7 +106,7 @@ void manual_arm_forward(){
 
 void manual_arm_reverse(){
     if(!is_catch_extended){
-            catch_r_claw.extend(cylinder1);
+            catch_ninetyone.extend(cylinder1);
             is_catch_extended =! is_catch_extended;
         }
     pto_l.setVelocity(100,pct);
@@ -124,7 +129,7 @@ void run_six_bar(){
 
     if(abs(controller1.AxisD.position()) > 5){
         if(is_catch_extended){
-            catch_r_claw.retract(cylinder1);
+            catch_ninetyone.retract(cylinder1);
             is_catch_extended =! is_catch_extended;
         }
         move_6_bar(controller1.AxisD.position());
@@ -132,7 +137,7 @@ void run_six_bar(){
     }
     else{
         if(!is_catch_extended){
-            catch_r_claw.extend(cylinder1);
+            catch_ninetyone.extend(cylinder1);
             is_catch_extended =! is_catch_extended;
         }
         pto_l.stop();
@@ -148,7 +153,7 @@ void l_claw_move(){
 }
 
 void r_claw_move(){
-    is_r_claw_grabbing ? catch_r_claw.extend(cylinder2) : catch_r_claw.retract(cylinder2);
+    is_r_claw_grabbing ? pas_r_claw.extend(cylinder2) : pas_r_claw.retract(cylinder2);
     is_r_claw_grabbing =! is_r_claw_grabbing;
 }
 
@@ -157,53 +162,103 @@ void finger_move(){
     is_finger_down = !is_finger_down;
 }
 
-void ninety_one_flip(){
-    is_ninety_one_down ? ninety_one.extend(cylinder2) : ninety_one.retract(cylinder2);
-    is_ninety_one_down =! is_ninety_one_down;
+void ninetyone_flip(){
+    is_ninetyone_down ? catch_ninetyone.extend(cylinder2) : catch_ninetyone.retract(cylinder2);
+    is_ninetyone_down =! is_ninetyone_down;
 }
 
 void load_beam(){
     if(!is_catch_extended){
-            catch_r_claw.extend(cylinder1);
+            catch_ninetyone.extend(cylinder1);
             is_catch_extended =! is_catch_extended;
         }
     pto_l.setVelocity(100,pct);
     pto_r.setVelocity(100,pct);
-    pto_l.spinToPosition(-1.34,turns,false);
-    pto_r.spinToPosition(-1.34,turns,true);
+    pto_l.spinFor(-1.55,turns,false);
+    pto_r.spinFor(-1.55,turns,true);
     wait(0.5,sec);
 
     l_claw_finger.extend(cylinder1);
     is_l_claw_grabbing = false;
-    catch_r_claw.retract(cylinder2);
+    pas_r_claw.retract(cylinder2);
     is_r_claw_grabbing = true;
 
     wait(0.5, sec);
-    pto_l.spinToPosition(0,turns,false);
-    pto_r.spinToPosition(0,turns,true);
+    pto_l.spinFor(1.55,turns,false);
+    pto_r.spinFor(1.55,turns,false);
 
 }
 
-void hold_arm(){
-    while(controller1.ButtonLUp.pressing()){
-        if(is_catch_extended){
-            catch_r_claw.retract(cylinder1);
-            is_catch_extended =! is_catch_extended;
-        }
-    }
-    catch_r_claw.extend(cylinder1);
-    is_catch_extended =! is_catch_extended;
-}   
+   
 
+void corner_goal(){
+    is_pas_tech_on ? pas_r_claw.extend(cylinder1) : pas_r_claw.retract(cylinder1);
+    is_pas_tech_on = ! is_pas_tech_on;
+    
+    // if(!is_catch_extended){
+    //         catch_ninetyone.extend(cylinder1);
+    //         is_catch_extended =! is_catch_extended;
+    //     }
+    // pto_l.setVelocity(100,pct);
+    // pto_r.setVelocity(100,pct);
+    // pto_l.spinFor(-0.3,turns,false);
+    // pto_r.spinFor(-0.3,turns,false);
+}
+
+void stage_6_bar(){
+    six_bar_stage += 1;
+    int level = six_bar_stage % 3;
+    if(is_catch_extended){
+            catch_ninetyone.retract(cylinder1);
+            is_catch_extended =! is_catch_extended;
+    }
+    switch(level){
+        case(0):
+            pto_l.spin(forward);
+            pto_r.spin(reverse);
+            pto_l.setVelocity(100,percent);
+            pto_r.setVelocity(100,percent);
+            pto_r.spinFor(-2.11,turns, false);
+            pto_l.spinFor(2.11,turns, true);
+            pto_l.stop();
+            pto_r.stop();
+            break;
+        case(1):
+            pto_l.spin(forward);
+            pto_r.spin(reverse);
+            pto_l.setVelocity(100,percent);
+            pto_r.setVelocity(100,percent);
+            pto_r.spinFor(1.2,turns, false);
+            pto_l.spinFor(-1.2,turns, true);
+            pto_l.stop();
+            pto_r.stop();
+            break;
+        case(2):
+            pto_l.spin(forward);
+            pto_r.spin(reverse);
+            pto_l.setVelocity(100,percent);
+            pto_r.setVelocity(100,percent);
+            pto_r.spinFor(0.7,turns, false);
+            pto_l.spinFor(-0.7,turns, true);
+            pto_l.stop();
+            pto_r.stop();
+            break;
+            
+    }
+    catch_ninetyone.extend(cylinder1);
+    is_catch_extended =! is_catch_extended;
+
+}
 
 void setup_callbacks(){
     controller1.ButtonFDown.pressed(l_claw_move);
     controller1.ButtonFUp.pressed(r_claw_move);
-    controller1.ButtonEDown.pressed(ninety_one_flip);
+    controller1.ButtonEDown.pressed(ninetyone_flip);
     controller1.ButtonR3.pressed(finger_move);
+    controller1.ButtonEUp.pressed(corner_goal);
 
-    controller1.ButtonLDown.pressed(load_beam);
-    controller1.ButtonLUp.pressed(hold_arm);
+    controller1.ButtonLUp.pressed(load_beam);
+    controller1.ButtonLDown.pressed(stage_6_bar);
 
     controller1.ButtonRUp.pressed(manual_arm_forward);
     controller1.ButtonRDown.pressed(manual_arm_reverse);
@@ -220,7 +275,11 @@ int main() {
     setup_callbacks();
    
     while(1) {
+        Brain.Screen.clearLine(1);
+        Brain.Screen.setCursor(1,1);
         manual_drive(controller1.AxisB.position(), controller1.AxisA.position());
+
+        Brain.Screen.print("Pos: %f", pto_l.position(turns));
         this_thread::sleep_for(10);
     }
 }

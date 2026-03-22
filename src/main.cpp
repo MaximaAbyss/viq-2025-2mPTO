@@ -1,5 +1,5 @@
 #include "vex.h"
-// -2.11 121 6 BAR
+
 using namespace vex;
 
 vex::brain       Brain;
@@ -275,11 +275,7 @@ int main() {
     setup_callbacks();
    
     while(1) {
-        Brain.Screen.clearLine(1);
-        Brain.Screen.setCursor(1,1);
         manual_drive(controller1.AxisB.position(), controller1.AxisA.position());
-
-        Brain.Screen.print("Pos: %f", pto_l.position(turns));
         this_thread::sleep_for(10);
     }
 }

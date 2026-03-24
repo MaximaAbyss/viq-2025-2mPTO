@@ -34,8 +34,6 @@ void setup(){
     pto_l.resetPosition();
     pto_l.setStopping(hold);
     pto_l.setStopping(hold);
-    pto_l.setTimeout(2,sec);
-    pto_r.setTimeout(2,sec);
 
     l_claw_finger.extend(cylinder1);
     l_claw_finger.retract(cylinder2);
@@ -205,50 +203,6 @@ void corner_goal(){
     // pto_r.spinFor(-0.3,turns,false);
 }
 
-void stage_6_bar(){
-    six_bar_stage += 1;
-    int level = six_bar_stage % 3;
-    if(is_catch_extended){
-            catch_ninetyone.retract(cylinder1);
-            is_catch_extended =! is_catch_extended;
-    }
-    switch(level){
-        case(0):
-            pto_l.spin(forward);
-            pto_r.spin(reverse);
-            pto_l.setVelocity(100,percent);
-            pto_r.setVelocity(100,percent);
-            pto_r.spinFor(-2.11,turns, false);
-            pto_l.spinFor(2.11,turns, true);
-            pto_l.stop();
-            pto_r.stop();
-            break;
-        case(1):
-            pto_l.spin(forward);
-            pto_r.spin(reverse);
-            pto_l.setVelocity(100,percent);
-            pto_r.setVelocity(100,percent);
-            pto_r.spinFor(1.2,turns, false);
-            pto_l.spinFor(-1.2,turns, true);
-            pto_l.stop();
-            pto_r.stop();
-            break;
-        case(2):
-            pto_l.spin(forward);
-            pto_r.spin(reverse);
-            pto_l.setVelocity(100,percent);
-            pto_r.setVelocity(100,percent);
-            pto_r.spinFor(0.7,turns, false);
-            pto_l.spinFor(-0.7,turns, true);
-            pto_l.stop();
-            pto_r.stop();
-            break;
-            
-    }
-    catch_ninetyone.extend(cylinder1);
-    is_catch_extended =! is_catch_extended;
-
-}
 
 void setup_callbacks(){
     controller1.ButtonFDown.pressed(l_claw_move);
@@ -258,7 +212,6 @@ void setup_callbacks(){
     controller1.ButtonEUp.pressed(corner_goal);
 
     controller1.ButtonLUp.pressed(load_beam);
-    controller1.ButtonLDown.pressed(stage_6_bar);
 
     controller1.ButtonRUp.pressed(manual_arm_forward);
     controller1.ButtonRDown.pressed(manual_arm_reverse);

@@ -174,7 +174,9 @@ void load_beam(){
     pto_l.spinFor(-1.55,turns,false);
     pto_r.spinFor(-1.55,turns,false);
     wait(1.7,sec);
-
+    while(!is_finger_down){
+        wait(0.05,sec);
+    }
     l_claw_finger.extend(cylinder1);
     is_l_claw_grabbing = false;
     pas_r_claw.retract(cylinder2);

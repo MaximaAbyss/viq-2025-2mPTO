@@ -82,6 +82,20 @@ void manual_drive(int x_pos, int y_pos){
         
 }
 
+void catch_allows_lift(){
+    if(is_catch_extended){
+        catch_ninetyone.retract(cylinder1);
+        is_catch_extended =! is_catch_extended;
+    }
+}
+
+void catch_allows_arms(){
+    if(!is_catch_extended){
+        catch_ninetyone.extend(cylinder1);
+        is_catch_extended =! is_catch_extended;
+    }
+}
+
 void move_6_bar(int controller_pos){
     pto_l.spin(forward);
     pto_r.spin(reverse);
@@ -91,10 +105,7 @@ void move_6_bar(int controller_pos){
 }
 
 void manual_arm_forward(){
-    if(!is_catch_extended){
-            catch_ninetyone.extend(cylinder1);
-            is_catch_extended =! is_catch_extended;
-        }
+    catch_allows_arms();
     pto_l.setVelocity(100,pct);
     pto_r.setVelocity(100,pct);
 
@@ -103,10 +114,7 @@ void manual_arm_forward(){
 }
 
 void manual_arm_reverse(){
-    if(!is_catch_extended){
-            catch_ninetyone.extend(cylinder1);
-            is_catch_extended =! is_catch_extended;
-        }
+    catch_allows_arms();
     pto_l.setVelocity(100,pct);
     pto_r.setVelocity(100,pct); 
 
@@ -126,18 +134,12 @@ void manual_arm_stop(){
 void run_six_bar(){
 
     if(abs(controller1.AxisD.position()) > 5){
-        if(is_catch_extended){
-            catch_ninetyone.retract(cylinder1);
-            is_catch_extended =! is_catch_extended;
-        }
+        catch_allows_lift();
         move_6_bar(controller1.AxisD.position());
         
     }
     else{
-        if(!is_catch_extended){
-            catch_ninetyone.extend(cylinder1);
-            is_catch_extended =! is_catch_extended;
-        }
+        catch_allows_arms();
         pto_l.stop();
         pto_r.stop();
         
@@ -166,10 +168,7 @@ void ninetyone_flip(){
 }
 
 void load_beam(){
-    if(!is_catch_extended){
-            catch_ninetyone.extend(cylinder1);
-            is_catch_extended =! is_catch_extended;
-        }
+    catch_allows_arms();
     pto_l.setVelocity(100,pct);
     pto_r.setVelocity(100,pct);
     pto_l.spinFor(-1.55,turns,false);

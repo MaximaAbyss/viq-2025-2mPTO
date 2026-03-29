@@ -173,8 +173,8 @@ void load_beam(){
     pto_l.setVelocity(100,pct);
     pto_r.setVelocity(100,pct);
     pto_l.spinFor(-1.55,turns,false);
-    pto_r.spinFor(-1.55,turns,true);
-    wait(0.5,sec);
+    pto_r.spinFor(-1.55,turns,false);
+    wait(1.7,sec);
 
     l_claw_finger.extend(cylinder1);
     is_l_claw_grabbing = false;
@@ -192,15 +192,6 @@ void load_beam(){
 void corner_goal(){
     is_pas_tech_on ? pas_r_claw.extend(cylinder1) : pas_r_claw.retract(cylinder1);
     is_pas_tech_on = ! is_pas_tech_on;
-    
-    // if(!is_catch_extended){
-    //         catch_ninetyone.extend(cylinder1);
-    //         is_catch_extended =! is_catch_extended;
-    //     }
-    // pto_l.setVelocity(100,pct);
-    // pto_r.setVelocity(100,pct);
-    // pto_l.spinFor(-0.3,turns,false);
-    // pto_r.spinFor(-0.3,turns,false);
 }
 
 

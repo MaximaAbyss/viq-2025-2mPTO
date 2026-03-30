@@ -7,8 +7,8 @@ vex::brain       Brain;
 //      DRIVETRAIN  
 vex::motor dt_tl(PORT11, 1.0,true);
 vex::motor dt_tr(PORT5, 1.0,false);
-motor dt_bl(PORT1, 1.0,false);
-motor dt_br(PORT7, 1.0,true);
+motor dt_bl(PORT7, 1.0,true);
+motor dt_br(PORT1, 1.0,false);
 
 motor_group dt_l(dt_tl, dt_bl);
 motor_group dt_r(dt_tr, dt_br);
@@ -60,15 +60,11 @@ void manual_drive(int x_pos, int y_pos){
     int right_dt_speed = y_pos - x_pos;
 
     if(abs(left_dt_speed) >=5 || abs(right_dt_speed) >=5){
-        dt_tl.spin(forward);
-        dt_tr.spin(forward);
-        dt_bl.spin(forward);
-        dt_br.spin(forward);
+        dt_l.spin(forward);
+        dt_r.spin(forward);
 
-        dt_tl.setVelocity(left_dt_speed,pct);
-        dt_bl.setVelocity(right_dt_speed,pct);
-        dt_tr.setVelocity(right_dt_speed,pct);
-        dt_br.setVelocity(left_dt_speed,pct);
+        dt_l.setVelocity(left_dt_speed,pct);
+        dt_r.setVelocity(right_dt_speed,pct);
         is_dt_stopped = false;
     }
     else if(is_dt_stopped == false){

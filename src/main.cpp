@@ -169,16 +169,19 @@ void load_beam(){
     pto_r.setVelocity(100,pct);
     pto_l.spinFor(-1.55,turns,false);
     pto_r.spinFor(-1.55,turns,false);
-    wait(1.7,sec);
+    wait(1,sec);
     while(!is_finger_down){
         wait(0.05,sec);
     }
+    wait(0.7,sec);
     l_claw_finger.extend(cylinder1);
     is_l_claw_grabbing = false;
     pas_r_claw.retract(cylinder2);
     is_r_claw_grabbing = true;
 
     wait(0.5, sec);
+    pto_l.setVelocity(100,pct);
+    pto_r.setVelocity(100,pct);
     pto_l.spinFor(1.55,turns,false);
     pto_r.spinFor(1.55,turns,false);
 

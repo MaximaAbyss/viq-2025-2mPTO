@@ -129,7 +129,7 @@ void manual_arm_stop(){
 
 void run_six_bar(){
 
-    if(abs(controller1.AxisD.position()) > 5){
+    if(abs(controller1.AxisD.position()) > 15){
         catch_allows_lift();
         move_6_bar(controller1.AxisD.position());
         
